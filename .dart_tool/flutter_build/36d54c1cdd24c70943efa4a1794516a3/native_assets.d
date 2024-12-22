@@ -1,0 +1,1 @@
+ /home/elias/Nextcloud/Data/Programms/library/book_library/.dart_tool/flutter_build/36d54c1cdd24c70943efa4a1794516a3/native_assets.yaml: 
