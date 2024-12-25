@@ -1,4 +1,7 @@
 import 'package:book_library/screens/book/book_view.dart';
+import 'package:book_library/screens/reads/read_view.dart';
+import 'package:book_library/screens/records/record_view.dart';
+import 'package:book_library/screens/shelf/shelf_view.dart';
 import 'package:flutter/material.dart';
 
 class OverView extends StatelessWidget {
@@ -38,7 +41,11 @@ class OverView extends StatelessWidget {
               'Shelfs',
               textScaler: TextScaler.linear(1.5),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const ShelfView();
+              }));
+            },
           ),
           // Reads
           ElevatedButton(
@@ -49,7 +56,11 @@ class OverView extends StatelessWidget {
               'Reads',
               textScaler: TextScaler.linear(1.5),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const ReadView();
+              }));
+            },
           ),
           // Records
           ElevatedButton(
@@ -60,7 +71,11 @@ class OverView extends StatelessWidget {
               'Records',
               textScaler: TextScaler.linear(1.5),
             ),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {
+                return const RecordView();
+              }));
+            },
           ),
         ],
       ),

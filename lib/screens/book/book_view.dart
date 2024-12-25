@@ -56,7 +56,7 @@ class BookViewState extends State<BookView> {
     List<DataRow> output = [];
     for (int i = 0; i < count; i++) {
       output.add(DataRow(cells: [
-        DataCell(Text(bookList[i].isbn.toString()), onTap: () {
+        DataCell(Text(bookList[i].isbn), onTap: () {
           _navigateToMod(context, 'Edit Book', bookList[i]);
         }),
         DataCell(Text(bookList[i].author), onTap: () {

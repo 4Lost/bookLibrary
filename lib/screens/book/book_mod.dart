@@ -11,7 +11,7 @@ class BookMod extends StatefulWidget {
     return BookModState(appBarTitle, book);
   }
 }
-// TODO: Maby add more values => look up at api what possible
+
 class BookModState extends State<BookMod> {
   String appBarTitle = '';
   Book book;
@@ -176,8 +176,14 @@ class BookModState extends State<BookMod> {
   }
 
   void searchIsbn(String isbn) {
+    String apiAuthor = '';
+    String apiTitle = '';
     // TODO: search ofr isbn => see api in Haskell project
-    // TODO: load data if found into empty field.
-    if authorController
+    if (authorController.text != '') {
+      authorController.text = apiAuthor;
+    }
+    if (titleController.text != '') {
+      titleController.text = apiTitle;
+    }
   }
 }
