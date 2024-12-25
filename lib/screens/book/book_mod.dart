@@ -15,15 +15,18 @@ class BookMod extends StatefulWidget {
 class BookModState extends State<BookMod> {
   String appBarTitle = '';
   Book book;
-  DatabaseHelper helper = DatabaseHelper();
   TextEditingController isbnController = TextEditingController();
   TextEditingController authorController = TextEditingController();
   TextEditingController titleController = TextEditingController();
+  DatabaseHelper helper = DatabaseHelper();
+  String? _errorText;
+
   BookModState(this.appBarTitle, this.book) {
     isbnController.text = book.isbn;
     authorController.text = book.author;
     titleController.text = book.title;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,14 +40,16 @@ class BookModState extends State<BookMod> {
           // ISBN
           Padding(
             padding: const EdgeInsets.only(top: 15.0, bottom: 15.0),
-            child: TextField(
+            child: TextFormField(
               controller: isbnController,
               decoration: InputDecoration(
                   labelText: 'ISBN',
+                  errorText: _errorText,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0))),
               onChanged: (isbn) {
-                searchIsbn(isbn);
+                _checkIsbn();
+                _searchIsbn(isbn);
               },
             ),
           ),
@@ -118,25 +123,54 @@ class BookModState extends State<BookMod> {
     );
   }
 
+  void _setErrorText(String? errorText) {
+    setState(() {
+      _errorText = errorText;
+    });
+  }
+
+  void _checkIsbn() async {
+    final String isbn = isbnController.value.text;
+    _setErrorText(await helper.isIsbnUsed(isbn)
+        ? book.isbn == isbn
+            ? null
+            : 'ISBN is already used'
+        : isbn.length > 13
+            ? 'ISBN is too long'
+            : null);
+  }
+
+  void _searchIsbn(String isbn) {
+    debugPrint(isbn);
+    String apiAuthor = '';
+    String apiTitle = '';
+    // TODO: search ofr isbn => see api in Haskell project
+    if (authorController.text != '') {
+      authorController.text = apiAuthor;
+    }
+    if (titleController.text != '') {
+      titleController.text = apiTitle;
+    }
+  }
+
   void _save() async {
-    if (!checkIsbn(isbnController.text)) {
+    if (_errorText != null) {
       _showAlertDialog('Status', 'ISBN not valid');
       return;
     }
     moveToLastScreen();
     int result;
-    if (book.isbn != '') {
-      String oldIsbn = book.isbn;
-      book.isbn = isbnController.text;
-      book.author = authorController.text;
-      book.title = titleController.text;
+    String oldIsbn = book.isbn;
+    book.isbn = isbnController.text;
+    book.author = authorController.text;
+    book.title = titleController.text;
+
+    if (oldIsbn != '') {
       result = await helper.updateBook(book, oldIsbn);
     } else {
-      book.isbn = isbnController.text;
-      book.author = authorController.text;
-      book.title = titleController.text;
       result = await helper.insertBook(book);
     }
+
     if (result != 0) {
       _showAlertDialog('Status', 'Book Saved Successfully');
     } else {
@@ -144,11 +178,20 @@ class BookModState extends State<BookMod> {
     }
   }
 
-  bool checkIsbn(String isbn) {
-    // TODO: Check ob isbn nicht zu lang ist
-    // TODO: wenn schon vorhanden und ungleich book.isbn eine fehlermeldung ausgeben ud false zurück geben.
-    // TODO: Fehlermeldungen für vershciedene nicht passend eingaben
-    return isbn == '' ? false : true;
+  void _delete() async {
+    int result = 1;
+
+    if (book.isbn != '') {
+      result = await helper.deleteBook(book.isbn);
+    }
+
+    moveToLastScreen();
+
+    if (result != 0) {
+      _showAlertDialog('Status', 'Book Deleted Successfully');
+    } else {
+      _showAlertDialog('Status', 'Problem Deleting Book');
+    }
   }
 
   void _showAlertDialog(String title, String message) {
@@ -161,29 +204,11 @@ class BookModState extends State<BookMod> {
     Navigator.pop(context, true);
   }
 
-  void _delete() async {
-    int result = 1;
-    if (book.isbn != '') {
-      result = await helper.deleteBook(book.isbn);
-    }
-    moveToLastScreen();
-    debugPrint(result.toString());
-    if (result != 0) {
-      _showAlertDialog('Status', 'Book Deleted Successfully');
-    } else {
-      _showAlertDialog('Status', 'Problem Deleting Book');
-    }
-  }
-
-  void searchIsbn(String isbn) {
-    String apiAuthor = '';
-    String apiTitle = '';
-    // TODO: search ofr isbn => see api in Haskell project
-    if (authorController.text != '') {
-      authorController.text = apiAuthor;
-    }
-    if (titleController.text != '') {
-      titleController.text = apiTitle;
-    }
+  @override
+  void dispose() {
+    isbnController.dispose();
+    authorController.dispose();
+    titleController.dispose();
+    super.dispose();
   }
 }

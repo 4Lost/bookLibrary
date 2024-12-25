@@ -9,25 +9,25 @@ class DatabaseHelper {
   static Database? _database;
 
   // Book
-  String bookTable = 'book_table';
-  String bookColIsbn = 'isbn';
-  String bookColAuthor = 'author';
-  String bookColTitle = 'title';
+  final String _bookTable = 'book_table';
+  final String _bookColIsbn = 'isbn';
+  final String _bookColAuthor = 'author';
+  final String _bookColTitle = 'title';
   // Shelf
-  String shelfTable = 'shelf_table';
-  String shelfColIsbn = 'isbn';
-  String shelfColPlace = 'place';
-  String shelfColShelf = 'shelf';
-  String shelfColBoard = 'board';
-  String shelfColSpot = 'spot';
+  final String _shelfTable = 'shelf_table';
+  final String _shelfColIsbn = 'isbn';
+  final String _shelfColPlace = 'place';
+  final String _shelfColShelf = 'shelf';
+  final String _shelfColBoard = 'board';
+  final String _shelfColSpot = 'spot';
   // Read
-  String readTable = 'read_table';
-  String readColIsbn = 'isbn';
-  String readColDate = 'date';
+  final String _readTable = 'read_table';
+  final String _readColIsbn = 'isbn';
+  final String _readColDate = 'date';
   // Record
-  String recordTable = 'record_table';
-  String recordColIsbn = 'isbn';
-  String recordColComment = 'comment';
+  final String _recordTable = 'record_table';
+  final String _recordColIsbn = 'isbn';
+  final String _recordColComment = 'comment';
 
   DatabaseHelper._createInstance();
 
@@ -42,6 +42,7 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDatabase() async {
+    // TODO add get link from singleton login controller
     String path = '/home/elias/Nextcloud/Data/Programms/bookLibrary.bd';
 
     var booksDatabase =
@@ -51,43 +52,43 @@ class DatabaseHelper {
 
   void _createDB(Database db, int newVersion) async {
     await db.execute(
-        'CREATE TABLE $bookTable ($bookColIsbn VARCHAR(13) PRIMARY KEY, $bookColAuthor VARCHAR(13), $bookColTitle VARCHAR(30))');
+        'CREATE TABLE $_bookTable ($_bookColIsbn VARCHAR(13) PRIMARY KEY, $_bookColAuthor VARCHAR(13), $_bookColTitle VARCHAR(30))');
     await db.execute(
-        'CREATE TABLE $shelfTable ($shelfColIsbn VARCHAR(13), $shelfColPlace VARCHAR(10), $shelfColShelf VARCHAR(7), $shelfColBoard VARCHAR(7), $shelfColSpot VARCHAR(7), PRIMARY KEY ($shelfColPlace, $shelfColShelf, $shelfColBoard, $shelfColSpot), FOREIGN KEY ($shelfColIsbn) REFERENCES $bookTable ($bookColIsbn) ON DELETE CASCADE)');
+        'CREATE TABLE $_shelfTable ($_shelfColIsbn VARCHAR(13), $_shelfColPlace VARCHAR(10), $_shelfColShelf VARCHAR(7), $_shelfColBoard VARCHAR(7), $_shelfColSpot VARCHAR(7), PRIMARY KEY ($_shelfColPlace, $_shelfColShelf, $_shelfColBoard, $_shelfColSpot), FOREIGN KEY ($_shelfColIsbn) REFERENCES $_bookTable ($_bookColIsbn) ON DELETE CASCADE)');
     await db.execute(
-        'CREATE TABLE $readTable ($readColIsbn VARCHAR(13), $readColDate DATE, PRIMARY KEY ($readColIsbn, $readColDate), FOREIGN KEY ($readColIsbn) REFERENCES $bookTable ($bookColIsbn) ON DELETE CASCADE)');
+        'CREATE TABLE $_readTable ($_readColIsbn VARCHAR(13), $_readColDate DATE, PRIMARY KEY ($_readColIsbn, $_readColDate), FOREIGN KEY ($_readColIsbn) REFERENCES $_bookTable ($_bookColIsbn) ON DELETE CASCADE)');
     await db.execute(
-        'CREATE TABLE $recordTable ($recordColIsbn VARCHAR(13) PRIMARY KEY, $recordColComment VARCHAR(30), FOREIGN KEY ($recordColIsbn) REFERENCES $bookColIsbn ($bookColIsbn) ON DELETE CASCADE)');
+        'CREATE TABLE $_recordTable ($_recordColIsbn VARCHAR(13) PRIMARY KEY, $_recordColComment VARCHAR(30), FOREIGN KEY ($_recordColIsbn) REFERENCES $_bookColIsbn ($_bookColIsbn) ON DELETE CASCADE)');
   }
 
   // -- Book
   // Get List
   Future<List<Map<String, dynamic>>> getBookListMap() async {
     Database db = await database;
-    var result = await db.query(bookTable, orderBy: '$bookColAuthor ASC');
+    var result = await db.query(_bookTable, orderBy: '$_bookColAuthor ASC');
     return result;
   }
 
   // Insert
   Future<int> insertBook(Book book) async {
     Database db = await database;
-    var result = await db.insert(bookTable, book.toMap());
+    var result = await db.insert(_bookTable, book.toMap());
     return result;
   }
 
   // Update
   Future<int> updateBook(Book book, String isbn) async {
     Database db = await database;
-    int result =
-        await db.update(bookTable, book.toMap(), where: '$bookColIsbn = $isbn');
+    int result = await db.update(_bookTable, book.toMap(),
+        where: '$_bookColIsbn = "$isbn"');
     return result;
   }
 
   // Delete
   Future<int> deleteBook(String isbn) async {
     Database db = await database;
-    int result =
-        await db.rawDelete('DELETE FROM $bookTable WHERE $bookColIsbn = $isbn');
+    int result = await db
+        .rawDelete('DELETE FROM $_bookTable WHERE $_bookColIsbn = "$isbn"');
     return result;
   }
 
@@ -95,10 +96,20 @@ class DatabaseHelper {
   Future<int> getBookCount() async {
     Database db = await database;
     List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from $bookTable');
+        await db.rawQuery('SELECT COUNT (*) from $_bookTable');
     int? result = Sqflite.firstIntValue(x);
     result ??= 0;
     return result;
+  }
+
+  // Get if
+  Future<bool> isIsbnUsed(String isbn) async {
+    Database db = await database;
+    List<Map<String, dynamic>> x = await db.rawQuery(
+        'SELECT COUNT (*) from $_bookTable WHERE $_bookColIsbn ="$isbn"');
+    int? result = Sqflite.firstIntValue(x);
+    result ??= 0;
+    return result != 0 ? true : false;
   }
 
   // Map to List Helper
@@ -119,16 +130,16 @@ class DatabaseHelper {
   // Get List
   Future<List<Map<String, dynamic>>> getShelfListMap() async {
     Database db = await database;
-    var result = await db.query(shelfTable,
+    var result = await db.query(_shelfTable,
         orderBy:
-            '$shelfColPlace, $shelfColShelf, $shelfColBoard, $shelfColSpot ASC');
+            '$_shelfColPlace, $_shelfColShelf, $_shelfColBoard, $_shelfColSpot ASC');
     return result;
   }
 
   // Insert
   Future<int> insertShelf(Shelf shelf) async {
     Database db = await database;
-    var result = await db.insert(shelfTable, shelf.toMap());
+    var result = await db.insert(_shelfTable, shelf.toMap());
     return result;
   }
 
@@ -136,9 +147,9 @@ class DatabaseHelper {
   Future<int> updateShelf(Shelf shelf, String isbn, String place,
       String shelfVar, String board, String spot) async {
     Database db = await database;
-    int result = await db.update(shelfTable, shelf.toMap(),
+    int result = await db.update(_shelfTable, shelf.toMap(),
         where:
-            '$shelfColIsbn = $isbn AND $shelfColPlace = $place AND $shelfColShelf = $shelfVar AND $shelfColBoard = $board AND $shelfColSpot = $spot');
+            '$_shelfColIsbn = "$isbn" AND $_shelfColPlace = "$place" AND $_shelfColShelf = "$shelfVar" AND $_shelfColBoard = "$board" AND $_shelfColSpot = "$spot"');
     return result;
   }
 
@@ -147,7 +158,7 @@ class DatabaseHelper {
       String board, String spot) async {
     Database db = await database;
     int result = await db.rawDelete(
-        'DELETE FROM $shelfTable WHERE $shelfColIsbn = $isbn AND $shelfColPlace = $place AND $shelfColShelf = $shelfVar AND $shelfColBoard = $board AND $shelfColSpot = $spot');
+        'DELETE FROM $_shelfTable WHERE $_shelfColIsbn = "$isbn" AND $_shelfColPlace = "$place" AND $_shelfColShelf = "$shelfVar" AND $_shelfColBoard = "$board" AND $_shelfColSpot = "$spot"');
     return result;
   }
 
@@ -155,7 +166,7 @@ class DatabaseHelper {
   Future<int> getShelfCount() async {
     Database db = await database;
     List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from $shelfTable');
+        await db.rawQuery('SELECT COUNT (*) from $_shelfTable');
     int? result = Sqflite.firstIntValue(x);
     result ??= 0;
     return result;
@@ -179,22 +190,22 @@ class DatabaseHelper {
   // Get List
   Future<List<Map<String, dynamic>>> getReadListMap() async {
     Database db = await database;
-    var result = await db.query(readTable, orderBy: '$readColDate ASC');
+    var result = await db.query(_readTable, orderBy: '$_readColDate ASC');
     return result;
   }
 
   // Insert
   Future<int> insertRead(Read read) async {
     Database db = await database;
-    var result = await db.insert(readTable, read.toMap());
+    var result = await db.insert(_readTable, read.toMap());
     return result;
   }
 
   // Update
   Future<int> updateRead(Read read, String isbn, String date) async {
     Database db = await database;
-    int result = await db.update(readTable, read.toMap(),
-        where: '$readColIsbn = $isbn AND $readColDate = $date');
+    int result = await db.update(_readTable, read.toMap(),
+        where: '$_readColIsbn = "$isbn" AND $_readColDate = "$date"');
     return result;
   }
 
@@ -202,7 +213,7 @@ class DatabaseHelper {
   Future<int> deleteRead(String isbn, String date) async {
     Database db = await database;
     int result = await db.rawDelete(
-        'DELETE FROM $readTable WHERE $readColIsbn = $isbn AND $readColDate = $date');
+        'DELETE FROM $_readTable WHERE $_readColIsbn = "$isbn" AND $_readColDate = "$date"');
     return result;
   }
 
@@ -210,7 +221,7 @@ class DatabaseHelper {
   Future<int> getReadCount() async {
     Database db = await database;
     List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from $readTable');
+        await db.rawQuery('SELECT COUNT (*) from $_readTable');
     int? result = Sqflite.firstIntValue(x);
     result ??= 0;
     return result;
@@ -234,22 +245,22 @@ class DatabaseHelper {
   // Get List
   Future<List<Map<String, dynamic>>> getRecordListMap() async {
     Database db = await database;
-    var result = await db.query(recordTable, orderBy: '$recordColIsbn ASC');
+    var result = await db.query(_recordTable, orderBy: '$_recordColIsbn ASC');
     return result;
   }
 
   // Insert
   Future<int> insertRecord(Records record) async {
     Database db = await database;
-    var result = await db.insert(readTable, record.toMap());
+    var result = await db.insert(_readTable, record.toMap());
     return result;
   }
 
   // Update
   Future<int> updateRecord(Records record, String isbn) async {
     Database db = await database;
-    int result = await db.update(recordTable, record.toMap(),
-        where: '$recordColIsbn = $isbn');
+    int result = await db.update(_recordTable, record.toMap(),
+        where: '$_recordColIsbn = "$isbn"');
     return result;
   }
 
@@ -257,7 +268,7 @@ class DatabaseHelper {
   Future<int> deleteRecord(String isbn) async {
     Database db = await database;
     int result = await db
-        .rawDelete('DELETE FROM $recordTable WHERE $recordColIsbn = $isbn');
+        .rawDelete('DELETE FROM $_recordTable WHERE $_recordColIsbn = "$isbn"');
     return result;
   }
 
@@ -265,7 +276,7 @@ class DatabaseHelper {
   Future<int> getRecordCount() async {
     Database db = await database;
     List<Map<String, dynamic>> x =
-        await db.rawQuery('SELECT COUNT (*) from $recordTable');
+        await db.rawQuery('SELECT COUNT (*) from $_recordTable');
     int? result = Sqflite.firstIntValue(x);
     result ??= 0;
     return result;
