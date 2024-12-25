@@ -6,10 +6,9 @@ class Book {
   Book(this._isbn, this._author, this._title);
 
   // TODO: Maby add more values => look up at api what possible
-  // Api helper class? isbn, author, title, pulisch date, publischer, languages,
   String get isbn => _isbn;
-  String get author => _author;
   String get title => _title;
+  String get author => _author;
 
   set isbn(String newIsbn) {
     _isbn = newIsbn;

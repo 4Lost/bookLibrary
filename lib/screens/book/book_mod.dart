@@ -1,3 +1,5 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:book_library/models/book.dart';
 import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +64,9 @@ class BookModState extends State<BookMod> {
                   labelText: 'Author',
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(5.0))),
+              onChanged: (author) {
+                print('test ${authorController.text}');
+              },
             ),
           ),
           // Title
@@ -130,7 +135,7 @@ class BookModState extends State<BookMod> {
   }
 
   void _checkIsbn() async {
-    final String isbn = isbnController.value.text;
+    final String isbn = isbnController.text;
     _setErrorText(await helper.isIsbnUsed(isbn)
         ? book.isbn == isbn
             ? null
@@ -140,23 +145,65 @@ class BookModState extends State<BookMod> {
             : null);
   }
 
-  void _searchIsbn(String isbn) {
-    debugPrint(isbn);
+  void _searchIsbn(String isbn) async {
+    String data;
+    var decodedData = {};
+
+    String apiAuthorLink = '';
+
+    String apiIsbn = '';
     String apiAuthor = '';
     String apiTitle = '';
-    // TODO: search ofr isbn => see api in Haskell project
-    if (authorController.text != '') {
-      authorController.text = apiAuthor;
+
+    http.Response response =
+        await http.get(Uri.parse('https://openlibrary.org/isbn/$isbn.json'));
+    if (response.statusCode != 200) {
+      debugPrint("No book found unter isbn: $isbn.");
+      return;
     }
-    if (titleController.text != '') {
+
+    decodedData = jsonDecode(response.body);
+
+    apiTitle = decodedData['title'];
+    apiIsbn = decodedData['isbn_13'][0];
+    apiAuthorLink =
+        'https://openlibrary.org${decodedData['authors'][0]['key']}.json';
+
+    response = await http.get(Uri.parse(apiAuthorLink));
+    if (response.statusCode != 200) {
+      debugPrint("No author found unter link: $apiAuthorLink.");
+      return;
+    }
+
+    decodedData = jsonDecode(response.body);
+
+    apiAuthor = decodedData['name'];
+
+    if (apiIsbn != '') {
+      isbnController.text = apiIsbn;
+    }
+    if (titleController.text == '') {
       titleController.text = apiTitle;
+    }
+    if (authorController.text == '') {
+      authorController.text = apiAuthor;
     }
   }
 
   void _save() async {
+    String isbn = isbnController.text;
     if (_errorText != null) {
       _showAlertDialog('Status', 'ISBN not valid');
       return;
+    }
+    if (isbn == '') {
+      // Generate lowest free number if no ISBN given
+      for (var minFree = 0; minFree < 9999999999999; minFree++) {
+        if (!await helper.isIsbnUsed(isbn)) {
+          isbn = minFree.toString();
+          break;
+        }
+      }
     }
     moveToLastScreen();
     int result;
