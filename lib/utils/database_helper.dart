@@ -1,12 +1,14 @@
 import 'package:book_library/models/read.dart';
 import 'package:book_library/models/records.dart';
 import 'package:book_library/models/shelf.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:book_library/models/book.dart';
 
 class DatabaseHelper {
   static DatabaseHelper? _databaseHelper;
   static Database? _database;
+  late String path;
 
   // Book
   final String _bookTable = 'book_table';
@@ -29,10 +31,10 @@ class DatabaseHelper {
   final String _recordColIsbn = 'isbn';
   final String _recordColComment = 'comment';
 
-  DatabaseHelper._createInstance();
+  DatabaseHelper._createInstance(this.path);
 
-  factory DatabaseHelper() {
-    _databaseHelper ??= DatabaseHelper._createInstance();
+  factory DatabaseHelper(String path) {
+    _databaseHelper ??= DatabaseHelper._createInstance(path);
     return _databaseHelper!;
   }
 
@@ -42,12 +44,17 @@ class DatabaseHelper {
   }
 
   Future<Database> initializeDatabase() async {
-    // TODO add get link from singleton login controller
-    String path = '/home/elias/Nextcloud/Data/Programms/bookLibrary.bd';
+    String fullPath =
+        '/home/elias/Nextcloud/Data/Programms/$path/bookLibrary.bd';
+    debugPrint(fullPath);
 
-    var booksDatabase =
-        await openDatabase(path, version: 1, onCreate: _createDB);
-    return booksDatabase;
+    var db = await openDatabase(fullPath, version: 1, onCreate: _createDB);
+    return db;
+  }
+
+  Future close() async {
+    final db = await database;
+    db.close();
   }
 
   void _createDB(Database db, int newVersion) async {

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:sqflite/sqflite.dart';
 
+// TODO: fix dummy path
+
 class RecordView extends StatefulWidget {
   const RecordView({super.key});
 
@@ -15,7 +17,7 @@ class RecordView extends StatefulWidget {
 }
 
 class RecordViewState extends State<RecordView> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  DatabaseHelper databaseHelper = DatabaseHelper('');
   List<Records> recordList = [];
   int count = 0;
   @override

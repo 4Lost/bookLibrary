@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:sqflite/sqflite.dart';
 
+// TODO: fix dummy path
+
 class ShelfView extends StatefulWidget {
   const ShelfView({super.key});
 
@@ -15,7 +17,7 @@ class ShelfView extends StatefulWidget {
 }
 
 class ShelfViewState extends State<ShelfView> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  DatabaseHelper databaseHelper = DatabaseHelper('');
   List<Shelf> shelfList = [];
   int count = 0;
   @override

@@ -2,6 +2,8 @@ import 'package:book_library/models/shelf.dart';
 import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 
+// TODO: fix dummy path
+
 class ShelfMod extends StatefulWidget {
   final String appBarTitle;
   final Shelf shelf;
@@ -15,7 +17,7 @@ class ShelfMod extends StatefulWidget {
 class ShelfModState extends State<ShelfMod> {
   String appBarTitle = '';
   Shelf shelf;
-  DatabaseHelper helper = DatabaseHelper();
+  DatabaseHelper helper = DatabaseHelper('');
   TextEditingController isbnController = TextEditingController();
   TextEditingController placeController = TextEditingController();
   TextEditingController shelfController = TextEditingController();

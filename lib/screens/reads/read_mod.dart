@@ -2,6 +2,8 @@ import 'package:book_library/models/read.dart';
 import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 
+// TODO: fix dummy path
+
 class ReadMod extends StatefulWidget {
   final String appBarTitle;
   final Read read;
@@ -15,7 +17,7 @@ class ReadMod extends StatefulWidget {
 class ReadModState extends State<ReadMod> {
   String appBarTitle = '';
   Read read;
-  DatabaseHelper helper = DatabaseHelper();
+  DatabaseHelper helper = DatabaseHelper('');
   TextEditingController isbnController = TextEditingController();
   TextEditingController dateController = TextEditingController();
   ReadModState(this.appBarTitle, this.read) {

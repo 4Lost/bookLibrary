@@ -5,25 +5,28 @@ import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 
 class BookMod extends StatefulWidget {
+  String path;
   final String appBarTitle;
   final Book book;
-  const BookMod(this.appBarTitle, this.book, {super.key});
+  BookMod(this.appBarTitle, this.book, {super.key, required this.path});
   @override
   State<StatefulWidget> createState() {
-    return BookModState(appBarTitle, book);
+    return BookModState(appBarTitle, book, path);
   }
 }
 
 class BookModState extends State<BookMod> {
+  String path;
   String appBarTitle = '';
   Book book;
   TextEditingController isbnController = TextEditingController();
   TextEditingController authorController = TextEditingController();
   TextEditingController titleController = TextEditingController();
-  DatabaseHelper helper = DatabaseHelper();
+  late DatabaseHelper helper;
   String? _errorText;
 
-  BookModState(this.appBarTitle, this.book) {
+  BookModState(this.appBarTitle, this.book, this.path) {
+    helper = DatabaseHelper(path);
     isbnController.text = book.isbn;
     authorController.text = book.author;
     titleController.text = book.title;

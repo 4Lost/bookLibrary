@@ -2,6 +2,8 @@ import 'package:book_library/models/records.dart';
 import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 
+// TODO: fix dummy path
+
 class RecordMod extends StatefulWidget {
   final String appBarTitle;
   final Records record;
@@ -15,7 +17,7 @@ class RecordMod extends StatefulWidget {
 class RecordModState extends State<RecordMod> {
   String appBarTitle = '';
   Records record;
-  DatabaseHelper helper = DatabaseHelper();
+  DatabaseHelper helper = DatabaseHelper('');
   TextEditingController isbnController = TextEditingController();
   TextEditingController commentController = TextEditingController();
   RecordModState(this.appBarTitle, this.record) {

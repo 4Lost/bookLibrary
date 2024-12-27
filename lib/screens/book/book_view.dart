@@ -6,38 +6,46 @@ import 'package:book_library/models/book.dart';
 import 'package:sqflite/sqflite.dart';
 
 class BookView extends StatefulWidget {
-  const BookView({super.key});
+  String path;
+  BookView({super.key, required this.path});
 
   @override
   State<StatefulWidget> createState() {
-    return BookViewState();
+    return BookViewState(path);
   }
 }
 
 class BookViewState extends State<BookView> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  String path;
+  late DatabaseHelper helper;
   List<Book> bookList = [];
   int count = 0;
+
+  BookViewState(this.path) {
+    helper = DatabaseHelper(path);
+  }
+
   @override
   // TODO: Eventuell Rahmen um Tabelle / Bessere Idee als Tabelle?
   Widget build(BuildContext context) {
     updateListView();
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Books'),
-        ),
-        body: Center(
-            child: ListView(children: [
-          _createDataTable(context),
-        ])),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _navigateToMod(context, 'Add Book', Book('', '', ''));
-          },
-          tooltip: 'Add Book',
-          child: const Text('+'),
-        ));
+      appBar: AppBar(
+        title: const Text('Books'),
+      ),
+      body: Center(
+          child: ListView(children: [
+        _createDataTable(context),
+      ])),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _navigateToMod(context, 'Add Book', Book('', '', ''));
+        },
+        tooltip: 'Add Book',
+        child: const Text('+'),
+      ),
+    );
   }
 
   DataTable _createDataTable(BuildContext context) {
@@ -72,14 +80,14 @@ class BookViewState extends State<BookView> {
 
   _navigateToMod(BuildContext context, String appBarTitle, Book book) {
     Navigator.push(context, MaterialPageRoute(builder: (context) {
-      return BookMod(appBarTitle, book);
+      return BookMod(appBarTitle, book, path: path);
     }));
   }
 
   void updateListView() {
-    final Future<Database> dbFuture = databaseHelper.initializeDatabase();
+    final Future<Database> dbFuture = helper.initializeDatabase();
     dbFuture.then((database) {
-      Future<List<Book>> bookListFuture = databaseHelper.getBookList();
+      Future<List<Book>> bookListFuture = helper.getBookList();
       bookListFuture.then((bookList) {
         setState(() {
           this.bookList = bookList;

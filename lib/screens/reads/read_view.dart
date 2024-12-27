@@ -4,6 +4,8 @@ import 'package:book_library/utils/database_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 
+// TODO: fix dummy path
+
 class ReadView extends StatefulWidget {
   const ReadView({super.key});
 
@@ -14,7 +16,7 @@ class ReadView extends StatefulWidget {
 }
 
 class ReadViewState extends State<ReadView> {
-  DatabaseHelper databaseHelper = DatabaseHelper();
+  DatabaseHelper databaseHelper = DatabaseHelper('');
   List<Read> readList = [];
   int count = 0;
   @override
